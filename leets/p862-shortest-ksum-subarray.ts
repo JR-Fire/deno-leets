@@ -4,7 +4,6 @@ export function shortestSubarray(nums: number[], k: number): number {
 
   let start = 0;
   let end = nums.length - 1;
-
   while (nums[start] <= 0 && start < end) {
     start++;
   }
@@ -27,14 +26,14 @@ export function shortestSubarray(nums: number[], k: number): number {
         minsum -= nums[minstart];
         minix--;
       }
-      if (r < 2) {
-        r = Math.min(m, minix + 1);
-      }
-      else {
+
+      if (r > 2) {
         r = Math.min(r, Math.min(m, minix + 1));
       }
-
-      if (r == 2)
+      else if (r < 2) {
+        r = Math.min(m, minix + 1);
+      }
+      else
         return r;
     }
 
@@ -47,14 +46,13 @@ export function shortestSubarray(nums: number[], k: number): number {
       p--;
 
       if (sp >= k) {
-        if (r < 2) {
-          r = Math.min(m, p);
-        }
-        else {
+        if (r > 2) {
           r = Math.min(r, Math.min(m, p));
         }
-
-        if (r == 2)
+        else if (r < 2) {
+          r = Math.min(m, p);
+        }
+        else
           return r;
       }
     }
