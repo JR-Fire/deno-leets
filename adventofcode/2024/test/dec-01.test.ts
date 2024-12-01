@@ -1,5 +1,5 @@
 import { expect } from "jsr:@std/expect";
-import { listDistance, listSimilarity } from "../../2024/dec-01.ts";
+import { listDistance, listSimilarity } from "../dec-01.ts";
 
 const { test } = Deno;
 
