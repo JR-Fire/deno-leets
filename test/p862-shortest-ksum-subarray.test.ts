@@ -14,6 +14,14 @@ test("p862: shortestSubarray", async ({ step }) => {
   }
 });
 
+test("sanity [1] for 1, returns 1", () => {
+  expect(shortestSubarray([1], 1)).toBe(1);
+})
+
+test("sanity [2, - 1, 2] for 3, returns 3", () => {
+  expect(shortestSubarray([2, - 1, 2], 3)).toBe(3);
+})
+
 // [{
 //   testData: [[5, 1], [4, 5], [11, 9], [9, 4]],
 //   expected: [[11, 9], [9, 4], [4, 5], [5, 1]]
@@ -87,9 +95,6 @@ const tests = [
     input: [- 900, 1, 2, 3, 88, 1, 0, -800], k: 89, expected: 2
   },
   {
-    input: [2, - 1, 2], k: 3, expected: 3
-  },
-  {
     input: [0, 0, - 2, -1, 2, 0, 0, 2, 0], k: 3, expected: 4
   },
   {
@@ -128,10 +133,6 @@ const tests = [
   },
 
 
-  {
-    input: [1],
-    k: 1, expected: 1
-  },
   {
     input: [1, 2],
     k: 4, expected: -1

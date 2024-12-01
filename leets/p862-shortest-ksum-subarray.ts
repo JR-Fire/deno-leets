@@ -1,4 +1,27 @@
-export function shortestSubarray(nums: number[], k: number): number {
+function shortestSubarrayO(nums: number[], k: number): number {
+  let ixS = 0
+  let ixE = nums.length;
+  let sum = nums[ixS];
+  let l = -1;
+
+  while (ixS < ixE) {
+    while (sum >= k) {
+      l = ixE - ixS;
+      sum -= nums[ixS];
+      ixS++;
+    }
+
+    
+    if (ixE > ixS)
+      sum+=nums[ixE];
+
+      ixE--;
+  }
+
+  return l;
+}
+
+function shortestSubarrayN2(nums: number[], k: number): number {
   if (nums.filter(n => n >= k).length > 0)
     return 1;
 
@@ -59,4 +82,9 @@ export function shortestSubarray(nums: number[], k: number): number {
   }
 
   return r;
+}
+
+export function shortestSubarray(nums: number[], k: number): number {
+  //return shortestSubarrayN2(nums, k);
+  return shortestSubarrayO(nums, k);
 }
