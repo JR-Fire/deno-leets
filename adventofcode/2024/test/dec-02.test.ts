@@ -1,5 +1,5 @@
 import { expect } from "jsr:@std/expect";
-import { safeReportsCount } from "../dec-02.ts";
+import { safeReportsCount, nearlySafeReportsCount } from "../dec-02.ts";
 
 const { test } = Deno;
 
@@ -18,10 +18,19 @@ test("example list has 2 safe reports", () => {
     expect(safeReportsCount(exampleData)).toBe(2);
 });
 
+test("example list has 4 dampened safe reports", () => {
+    expect(nearlySafeReportsCount(exampleData)).toBe(4);
+});
+
 const result1 = 598;
 //deno test runner is buggy and won't show test in the Testing tab if name is dynamic
-test(`example list has 598 safe reports`, () => {
+test(`data list has 598 safe reports`, () => {
     expect(safeReportsCount(data)).toBe(result1);
+});
+
+const result2 = 634;
+test("data list has 634 dampened safe reports", () => {
+    expect(nearlySafeReportsCount(data)).toBe(result2);
 });
 
 const exampleData = [
