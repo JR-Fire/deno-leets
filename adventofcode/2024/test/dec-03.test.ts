@@ -17,11 +17,11 @@ test("disabled sample data has enabled sum 48", () => {
 });
 
 const result1 = 189600467;
-const result2 = 666;
+const result2 = 107069718;
 test("input data has sum 189600467", () => {
     expect(sumMultiplications(data)).toBe(result1);
 });
-test("input data has enabled only sum 666", () => {
+test("input data has enabled only sum 107069718", () => {
     expect(sumEnabledMultiplications(data)).toBeGreaterThan(33315174);
     expect(sumEnabledMultiplications(data)).toBeLessThan(162693101);
     expect(sumEnabledMultiplications(data)).toBe(result2);

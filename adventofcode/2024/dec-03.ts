@@ -7,28 +7,13 @@ const mult_disabled = "don't()";
 export function sumEnabledMultiplications(lines: string[], isEnabled: boolean = true) {
     let sum = 0;
 
-    for (let i = 0; i < lines.length; i++) {
-        const row = lines[i];
+    const rows = lines.join('').split(mult_enabled);
+    for (let i = 0; i < rows.length; i++) {
+        const disabled = rows[i].indexOf(mult_disabled);
+        const row = disabled == -1 ? rows[i] : rows[i].slice(0, disabled);
+
         let mulS = row.indexOf(mult_start);
-        let nextDisabled = row.indexOf(mult_disabled);
-        let nextEnabled = 0;
         while (mulS >= 0) {
-            if (nextDisabled < 0 || mulS > nextDisabled) {
-                if (nextEnabled >= 0 && mulS > nextEnabled && (nextDisabled < 0 || mulS > nextDisabled)) {
-                    isEnabled = true;
-                }
-                if (nextDisabled >= 0 && mulS > nextDisabled && (nextEnabled <= 0 || mulS < nextEnabled)) {
-                    isEnabled = false;
-                }
-
-                if (isEnabled && nextEnabled > nextDisabled) {
-                    nextDisabled = row.indexOf(mult_disabled, nextEnabled + mult_enabled.length);
-                }
-                if (!isEnabled && nextDisabled > nextEnabled) {
-                    nextEnabled = row.indexOf(mult_enabled, nextDisabled + mult_disabled.length);
-                }
-            }
-
             const separator = row.indexOf(mult_separator, mulS + mult_start.length);
             const mulE = row.indexOf(mult_end, mulS + mult_start.length);
             if (isEnabled && separator > 0 && mulE > 0) {
