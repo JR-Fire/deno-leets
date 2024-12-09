@@ -5,7 +5,7 @@ const { test } = Deno;
 
 
 test("guard is at 6,4", () => {
-    expect(findGuard(sample)).toEqual(expect.arrayContaining([6, 4]));
+    expect(findGuard(sample)).toEqual([6, 4]);
 });
 
 test("sample data has 41 steps", () => {
