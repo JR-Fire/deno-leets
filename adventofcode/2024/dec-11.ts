@@ -1,7 +1,5 @@
-
-
 export function stones(data: string, blinks: number): number[] {
-  let stones = data.split(' ').map(s => parseInt(s));
+  let stones = data.split(" ").map((s) => parseInt(s));
 
   for (let i = 0; i < blinks; i++) {
     stones = blink(stones);
@@ -11,7 +9,7 @@ export function stones(data: string, blinks: number): number[] {
 }
 
 export function countStones(data: string, blinks: number): number {
-  const stones = data.split(' ').map(s => parseInt(s));
+  const stones = data.split(" ").map((s) => parseInt(s));
   const blinkMap: Map<number, number[]> = new Map<number, number[]>();
 
   let stoneTypes: Map<number, number> = new Map<number, number>();
@@ -30,8 +28,10 @@ export function countStones(data: string, blinks: number): number {
   return stoneTypes.entries().reduce((c, [_, count]) => c + count, 0);
 }
 
-export function blinkStoneTypes(currentTypes: Map<number, number>, blinkMap: Map<number, number[]>): Map<number, number> {
-
+export function blinkStoneTypes(
+  currentTypes: Map<number, number>,
+  blinkMap: Map<number, number[]>,
+): Map<number, number> {
   const next: Map<number, number> = new Map<number, number>();
   currentTypes.forEach((count, stone) => {
     let blinked = blinkMap.get(stone);
@@ -52,8 +52,7 @@ export function blinkStoneTypes(currentTypes: Map<number, number>, blinkMap: Map
 }
 
 export function blink(stones: number[]): number[] {
-
-  const line: number[] = []
+  const line: number[] = [];
   for (let i = 0; i < stones.length; i++) {
     const s = stones[i];
     if (s === 0) {
@@ -69,7 +68,7 @@ export function blink(stones: number[]): number[] {
       continue;
     }
 
-    const n = s * 2024
+    const n = s * 2024;
     line.push(n);
   }
 
