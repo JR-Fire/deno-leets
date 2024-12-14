@@ -30,12 +30,12 @@ test("1 2-plot discount cost", () => {
 
 test("1 3-plot and 1 discount cost", () => {
   expect(discount([['A', 'A'],
-                   ['A', 'B'],])).toBe((3*6)+(1*4));
+  ['A', 'B'],])).toBe((3 * 6) + (1 * 4));
 });
 
 test("1 and 1 3-plot discount cost", () => {
   expect(discount([['S', 'A'],
-                   ['A', 'A'],])).toBe((3 * 6) + (1 * 4));
+  ['A', 'A'],])).toBe((3 * 6) + (1 * 4));
 });
 
 test("2 1-plot discount cost", () => {
@@ -56,7 +56,7 @@ test("1 4-plot with 1 line discount cost", () => {
 
 test("1 4-plot discount cost", () => {
   expect(discount([['A', 'A'],
-                   ['A', 'A'],])).toBe(16);
+  ['A', 'A'],])).toBe(16);
 });
 
 test("1 9-plot discount cost", () => {
@@ -103,6 +103,11 @@ test("example garden discount cost 236", () => {
 
 test("ABBA garden discount cost 368", () => {
   expect(discount(abba)).toBe(368);
+});
+
+
+test("BFS-breaker garden discount cost 664", () => {
+  expect(discount(breakBFS)).toBe(664);
 });
 
 test("garden discount cost 877492", () => {
@@ -152,6 +157,19 @@ const abba = [
   "ABBAAA",
   "ABBAAA",
   "AAAAAA",
+].map((r) => r.split(""));
+
+const breakBFS = [
+  "AAAAAAAAAA",
+  "ABBBBBBBBA",
+  "ABAAAAAAAA",
+  "ABABBBBBBB",
+  "ABABBBBBBB",
+  "ABABBBBBBB",
+  "AAABBBBBBB",
+  "CCCCCCCCCC",
+  "CCCCCCCCCC",
+  "CCCCCCCCCC",
 ].map((r) => r.split(""));
 
 const data = [

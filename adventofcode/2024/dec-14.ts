@@ -124,7 +124,7 @@ export function mapRobots(robots: number[][][], startTurn: number, turns: number
       return [e, m];
     });
 
-    Deno.writeTextFileSync(`try${t}.txt`, printRobots(ny, nx, r));
+    //Deno.writeTextFileSync(`try${t}.txt`, printRobots(ny, nx, r));
   }
 
   return 0;

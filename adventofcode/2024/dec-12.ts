@@ -2,6 +2,12 @@ const LEFT = [0, -1];
 const RIGHT = [0, 1];
 const TOP = [-1, 0];
 const BOTTOM = [1, 0];
+
+const TOPLEFT = [-1, -1];
+const TOPRIGHT = [-1, 1];
+const BOTTOMLEFT = [1, -1];
+const BOTTOMRIGHT = [1, 1];
+
 const DIRECTIONS = [LEFT, RIGHT, TOP, BOTTOM];
 
 export function fences(garden: string[][]): number {
@@ -26,12 +32,13 @@ export function plotGarden(garden: string[][]): Map<string, number[]> {
       if (!mapped.has(vk)) {
         //plot this one
         mapped.add(vk);
-        console.log(`Start ${garden[row][col]} ${vk}`);
 
-        const paths: number[] = [0, 0, 4];
+        const paths: number[] = [0, 0, 0];
         const plot = allPaths(garden, row, col, paths, mapped);
-        if (plot.length > 4 && hasLoop(plot))
-          paths[2] -= 4
+        if (plot.length > 1)
+          paths[2] = countTurns(plot, garden);
+        else
+          paths[2] = 4;
 
         plots.set(vk, paths);
 
@@ -49,7 +56,6 @@ function allPaths(garden: string[][], row: number, col: number, paths: number[],
   paths[1] += 4;
 
   const plot: number[][] = [];
-  const adjacent: number[][] = [];
   DIRECTIONS.forEach((d) => {
     const dx = row + d[0];
     const dy = col + d[1];
@@ -57,9 +63,6 @@ function allPaths(garden: string[][], row: number, col: number, paths: number[],
 
     if (inGarden(dx, dy, garden, row)) {
       if (garden[dx][dy] === t) {
-        //adjacent
-        adjacent.push([d[0], d[1]]);
-
         //delete one side
         paths[1] -= 1;
 
@@ -73,15 +76,6 @@ function allPaths(garden: string[][], row: number, col: number, paths: number[],
     }
   });
 
-  if (adjacent.length === 2) {
-    const ax = adjacent[0][0] + adjacent[1][0];
-    const ay = adjacent[0][1] + adjacent[1][1]
-    if (ax !== 0 && ay !== 0 && inGarden(row + ax, col + ay, garden, row) && garden[row + ax][col + ay] !== t) {
-      console.log(`${t} ${row},${col} is a corner & adds 2 edges`)
-      paths[2] += 2;
-    }
-  }
-
   return [[row, col], ...plot];
 }
 
@@ -89,6 +83,57 @@ function inGarden(row: number, col: number, garden: string[][], i: number): bool
   return row >= 0 && row < garden.length && col >= 0 && col < garden[i].length;
 }
 
-function hasLoop(plot: number[][]) {
-  return false;
+function countTurns(plot: number[][], garden: string[][]): number {
+  let turns = 0;
+  for (let i = 0; i < plot.length; i++) {
+    const cropIx = plot[i];
+
+    const up = sameCrop(garden, cropIx, TOP);
+    const down = sameCrop(garden, cropIx, BOTTOM);
+    const left = sameCrop(garden, cropIx, LEFT);
+    const right = sameCrop(garden, cropIx, RIGHT);
+    const upleft = sameCrop(garden, cropIx, TOPLEFT);
+    const downleft = sameCrop(garden, cropIx, BOTTOMLEFT);
+    const upright = sameCrop(garden, cropIx, TOPRIGHT);
+    const downright = sameCrop(garden, cropIx, BOTTOMRIGHT);
+
+    if (!up && !left) {
+      turns++;
+    }
+
+    if (!down && !left) {
+      turns++;
+    }
+
+    if (!up && !right) {
+      turns++;
+    }
+
+    if (!down && !right) {
+      turns++;
+    }
+
+    if (up && left && !upleft) {
+      turns++;
+    }
+
+    if (down && left && !downleft) {
+      turns++;
+    }
+
+    if (up && right && !upright) {
+      turns++;
+    }
+
+    if (down && right && !downright) {
+      turns++;
+    }
+  }
+
+  return turns;
+}
+
+function sameCrop(garden: string[][], cropIx: number[], modifiers: number[]): boolean {
+  const ix = [cropIx[0] + modifiers[0], cropIx[1] + modifiers[1]];
+  return inGarden(ix[0], ix[1], garden, cropIx[0]) && garden[ix[0]][ix[1]] === garden[cropIx[0]][cropIx[1]];
 }
