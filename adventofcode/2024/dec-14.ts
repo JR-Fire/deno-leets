@@ -22,8 +22,8 @@ export function mapRobotsSafety(robots: number[][][], turns: number, nx: number,
   return quadrants.reduce((s, q) => s * q, 1);
 }
 
-export function robotsXMasSafety(robots: number[][][], startTurn: number, turns: number, nx: number, ny: number): number {
-  for (let t = startTurn; t < turns; t++) {
+export function robotsXMasSafety(robots: number[][][], nx: number, ny: number): number {
+  for (let t = 0; t < nx * ny + 1; t++) {
     const r = robots.map(r => {
       const s = r[0];
       const m = r[1];
@@ -33,7 +33,7 @@ export function robotsXMasSafety(robots: number[][][], startTurn: number, turns:
       return [e, m];
     });
 
-    if (getRobots(ny, nx, r, '*').filter((row) => row.indexOf('*************************') >= 0).length > 0) {
+    if (getRobots(ny, nx, r, '*').filter((row) => row.indexOf('*'.repeat(robots.length / 20)) >= 0).length > 0) {
       Deno.writeTextFileSync(`try${t}.txt`, printRobots(ny, nx, r));
       return t;
     }
