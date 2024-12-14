@@ -1,5 +1,5 @@
 import { expect } from "jsr:@std/expect";
-import { mapRobots, mapRobotsSafety, robotsXMasSafety, xmasTree } from "../dec-14.ts";
+import mapRobotsSafety, { mapRobots, robotsXMasSafety, xmasTree } from "../dec-14.ts";
 
 const { test } = Deno;
 
@@ -7,8 +7,12 @@ test("sample safety 12", () => {
   expect(mapRobotsSafety(sample, 100, 11, 7)).toEqual(12);
 });
 
-test("sample easter egg", () => {
-  expect(mapRobots(sample, 0, 10000, 11, 7)).toBeLessThan(2147483647101103);
+test("see sample easter egg", async () => {
+  expect(await mapRobots(sample, 11, 7)).not.toThrow();
+});
+
+test("see other easter egg", async () => {
+  expect(await mapRobots(otherRobots, 101, 103)).not.toThrow();
 });
 
 test("other easter egg", () => {

@@ -1,4 +1,4 @@
-export function mapRobotsSafety(robots: number[][][], turns: number, nx: number, ny: number): number {
+export default function mapRobotsSafety(robots: number[][][], turns: number, nx: number, ny: number): number {
   robots = robots.map(r => {
     const s = r[0];
     const m = r[1];
@@ -111,9 +111,9 @@ export function xmasTree(robots: number[][][], nx: number, ny: number): boolean 
   return false;
 }
 
-export function mapRobots(robots: number[][][], startTurn: number, turns: number, nx: number, ny: number, printFile = false): number {
+export async function mapRobots(robots: number[][][], nx: number, ny: number, printFile = false) {
 
-  for (let t = startTurn; t < turns; t++) {
+  for (let t = 0; t < nx * ny; t++) {
 
     const r = robots.map(r => {
       const s = r[0];
@@ -126,9 +126,12 @@ export function mapRobots(robots: number[][][], startTurn: number, turns: number
 
     if (printFile)
       Deno.writeTextFileSync(`try${t}.txt`, printRobots(ny, nx, r));
+    else {
+        console.clear();
+        console.log(`Try ${t}\n${printRobots(ny, nx, r)}`);
+        await new Promise((r) => { setTimeout(r, 50) });
+    }
   }
-
-  return 0;
 }
 
 function printRobots(ny: number, nx: number, robots: number[][][]): string {
