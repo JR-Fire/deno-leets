@@ -111,7 +111,7 @@ export function xmasTree(robots: number[][][], nx: number, ny: number): boolean 
   return false;
 }
 
-export function mapRobots(robots: number[][][], startTurn: number, turns: number, nx: number, ny: number): number {
+export function mapRobots(robots: number[][][], startTurn: number, turns: number, nx: number, ny: number, printFile = false): number {
 
   for (let t = startTurn; t < turns; t++) {
 
@@ -124,7 +124,8 @@ export function mapRobots(robots: number[][][], startTurn: number, turns: number
       return [e, m];
     });
 
-    //Deno.writeTextFileSync(`try${t}.txt`, printRobots(ny, nx, r));
+    if (printFile)
+      Deno.writeTextFileSync(`try${t}.txt`, printRobots(ny, nx, r));
   }
 
   return 0;
