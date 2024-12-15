@@ -111,7 +111,7 @@ export function xmasTree(robots: number[][][], nx: number, ny: number): boolean 
   return false;
 }
 
-export async function mapRobots(robots: number[][][], nx: number, ny: number, printFile = false) {
+export async function mapRobots(robots: number[][][], nx: number, ny: number, printFile = false, animate = false) {
 
   for (let t = 0; t < nx * ny; t++) {
 
@@ -126,10 +126,11 @@ export async function mapRobots(robots: number[][][], nx: number, ny: number, pr
 
     if (printFile)
       Deno.writeTextFileSync(`try${t}.txt`, printRobots(ny, nx, r));
-    else {
-        console.clear();
-        console.log(`Try ${t}\n${printRobots(ny, nx, r)}`);
-        await new Promise((r) => { setTimeout(r, 50) });
+
+    if (animate) {
+      console.clear();
+      console.log(`Try ${t}\n${printRobots(ny, nx, r)}`);
+      await new Promise((r) => { setTimeout(r, 50) });
     }
   }
 }
