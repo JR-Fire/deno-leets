@@ -1,5 +1,6 @@
 const GUARD = "@";
 const BOX = "O";
+const BIG_BOX = ['[', ']'];
 const BLOCK = "#";
 const PATH = ".";
 
@@ -20,11 +21,18 @@ export function allBoxes(warehouse: string[][], steps: string[]): number {
     return findBoxes(warehouse).reduce((s, b) => s + b[0] * 100 + b[1], 0);
 }
 
-export function findBoxes(m: string[][]): number[][] {
+export function allBigBoxes(warehouse: string[][], steps: string[]): number {
+    const bigWarehouse = engorge(warehouse);
+    walkBigWays(bigWarehouse, steps);
+
+    return findBoxes(bigWarehouse).reduce((s, b) => s + b[0] * 100 + b[1], 0);
+}
+
+function findBoxes(m: string[][]): number[][] {
     const boxes: number[][] = [];
     m.map((r, i) => {
         r.map((c, j) => {
-            if (c === BOX)
+            if (c === BOX || c === BIG_BOX[0])
                 boxes.push([i, j]);
         });
     });
@@ -42,7 +50,7 @@ export function findGuard(m: string[][]): number[] {
     return g[0]!;
 }
 
-export function walkWays(m: string[][], steps: string[]) {
+function walkWays(m: string[][], steps: string[]) {
     const guard: number[] = findGuard(m);
 
     let turn = 0;
@@ -66,6 +74,112 @@ export function walkWays(m: string[][], steps: string[]) {
     }
 }
 
+function walkBigWays(m: string[][], steps: string[]) {
+    const guard: number[] = findGuard(m);
+
+    printWarehouse(m, `Beginning...`);
+
+    let turn = 0;
+
+    let row = guard[0];
+    let col = guard[1];
+    while (turn < steps.length) {
+        const stepDir = steps[turn];
+
+        const dir = DIRECTIONS.get(stepDir)!;
+
+        const toRow = row + dir[1];
+        const toCol = col + dir[0];
+        if (largeStep(m, [col], [row], dir)) {
+            col = toCol;
+            row = toRow;
+        }
+
+        printWarehouse(m, `Turn ${turn}, went ${stepDir}`);
+
+        //end turn
+        turn++;
+    }
+}
+
+function printWarehouse(m: string[][], t: string, animate: boolean = false) {
+    console.clear();
+    console.log(t);
+    console.log(m.map(r => r.join('')).join('\n'));
+
+    if (animate)
+        //poor man's delay
+        for (let sleep = 0; sleep < 1000000000; sleep++);
+
+    // let tmr: number;
+    // const p = new Promise((r) => { tmr = setTimeout(r, 5000); });
+
+    // p.then().finally(() => {
+    //     if (tmr)
+    //         clearTimeout(tmr)
+    // });
+
+    // const handle = setTimeout(callback, timeout)
+    // clearTimeout(handle)
+
+    // let handle
+    // await Promise.race([
+    //     http.get(‘pocketgems.com / careers /’),
+    //     new Promise((resolve, reject) => {
+    //         handle = setTimeout(() => {
+    //             handle = undefined
+    //             resolve()
+    //         }, timeout)
+    //     })
+    // ])
+    // if (handle) {
+    //     clearTimeout(handle)
+    // }
+}
+
+function largeStep(m: string[][], fromCol: number[], fromRow: number[], dir: number[]): boolean {
+    const n = m.length;
+    const k = m[fromRow[0]].length;
+
+    let blocked = false;
+    const moves: number[] = [];
+    for (let stepIx = 0; stepIx < fromCol.length && !blocked; stepIx++) {
+
+        const toRow = fromRow[stepIx] + dir[1];
+        const toCol = fromCol[stepIx] + dir[0];
+        if (toCol < 0 || toRow < 0 || toCol >= k || toRow >= n || m[toRow][toCol] === BLOCK) {
+            //can't move, stay here
+            blocked = true;
+        }
+        else if (m[toRow][toCol] === BIG_BOX[0] && dir !== LEFT && dir !== RIGHT) {
+            if (largeStep(m, [toCol, toCol + 1], [toRow, toRow], dir))
+                moves.push(stepIx);
+            else
+                blocked = true;
+        }
+        else if (m[toRow][toCol] === BIG_BOX[1] && dir !== LEFT && dir !== RIGHT) {
+            if (largeStep(m, [toCol - 1, toCol], [toRow, toRow], dir))
+                moves.push(stepIx);
+            else
+                blocked = true;
+        }
+        else {
+            //mark to be moved
+            moves.push(stepIx);
+        }
+    }
+
+    if (!blocked && moves.length > 0) {
+        moves.forEach(stepIx => {
+            if (!move(m, fromCol[stepIx], fromRow[stepIx], dir)) {
+                blocked = true;
+            }
+        });
+    }
+
+    return !blocked;
+}
+
 function move(m: string[][], fromCol: number, fromRow: number, dir: number[]) {
     const n = m.length;
     const k = m[fromRow].length;
@@ -75,7 +189,7 @@ function move(m: string[][], fromCol: number, fromRow: number, dir: number[]) {
     if (toCol < 0 || toRow < 0 || toCol >= k || toRow >= n || m[toRow][toCol] === BLOCK) {
         //can't move, stay here
     }
-    else if (m[toRow][toCol] !== BOX || move(m, toCol, toRow, dir)) {
+    else if ([BOX, ...BIG_BOX].every(b => b !== m[toRow][toCol]) || move(m, toCol, toRow, dir)) {
         //move it
         m[toRow][toCol] = m[fromRow][fromCol];
         m[fromRow][fromCol] = PATH;
@@ -83,4 +197,25 @@ function move(m: string[][], fromCol: number, fromRow: number, dir: number[]) {
     }
 
     return false;
+}
+
+function engorge(w: string[][]): string[][] {
+    const engordedWarehouse: string[][] = [];
+    w.map(r => {
+        engordedWarehouse.push([]);
+        r.map(c => {
+            if (c === BOX) {
+                engordedWarehouse[engordedWarehouse.length - 1].push(...BIG_BOX);
+            } else {
+                engordedWarehouse[engordedWarehouse.length - 1].push(c);
+                if (c === GUARD)
+                    engordedWarehouse[engordedWarehouse.length - 1].push(PATH);
+                else {
+                    engordedWarehouse[engordedWarehouse.length - 1].push(c);
+                }
+            }
+        })
+    });
+
+    return engordedWarehouse;
 }
