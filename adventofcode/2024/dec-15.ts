@@ -23,10 +23,81 @@ export function allBoxes(warehouse: string[][], steps: string[]): number {
 
 export function allBigBoxes(warehouse: string[][], steps: string[]): number {
     const bigWarehouse = engorge(warehouse);
-    walkBigWays(bigWarehouse, steps);
+    walkTheWay(bigWarehouse, steps);
 
     return findBoxes(bigWarehouse).reduce((s, b) => s + b[0] * 100 + b[1], 0);
 }
+function walkTheWay(m: string[][], steps: string[], animate = false) {
+    printWarehouse(m, "Beginning...", animate);
+
+    const guard = findGuard(m);
+    while (steps.length > 0) {
+        const step = steps.shift()!;
+        const d = DIRECTIONS.get(step)!;
+        const row = d[1];
+        const column = d[0];
+        const moves: number[][] = getMoves(m, guard[0], guard[1], row, column);
+        if (moves.length > 0) {
+            //move it
+            const moved = new Set<string>();
+            moves.forEach(([toRow, toColumn]) => {
+                const fromRow = toRow - row;
+                const fromColumn = toColumn - column;
+                const k = `${toRow},${toColumn}`;
+                if (!moved.has(k)) {
+                    moved.add(k);
+
+                    m[toRow][toColumn] = m[fromRow][fromColumn];
+                    m[fromRow][fromColumn] = PATH;
+                }
+            });
+
+            guard[0] += row;
+            guard[1] += column;
+        }
+
+        printWarehouse(m, `${step}`, animate);
+    }
+}
+
+function getMoves(m: string[][], fromRow: number, fromColumn: number, directionRow: number, directionColumn: number): number[][] {
+    const [nextRow, nextColumn] = [fromRow + directionRow, fromColumn + directionColumn];
+
+    if (fromRow < 0 || fromRow >= m.length || fromColumn < 0 || fromColumn >= m[fromRow].length
+        || nextRow < 0 || nextRow >= m.length || nextColumn < 0 || nextColumn >= m[fromRow + directionRow].length)
+        //it's out
+        return [];
+
+    if (m[fromRow][fromColumn] === BLOCK || m[nextRow][nextColumn] === BLOCK)
+        //we're blocked
+        return [];
+
+    const bigBoxness = BIG_BOX.indexOf(m[nextRow][nextColumn]);
+    if (bigBoxness >= 0) {
+        const nextMoves = getMoves(m, nextRow, nextColumn, directionRow, directionColumn);
+        if (nextMoves.length === 0)
+            //no can do
+            return [];
+
+        if (directionRow !== 0) {
+            //account for box sides
+            // same row, but left half has the right half to the right: col+1, right half has left to its left: col-1
+            const boxHalf = bigBoxness === 0 ? 1 : -1;
+            const halfMoves2 = getMoves(m, nextRow, nextColumn + boxHalf, directionRow, directionColumn);
+            if (halfMoves2.length === 0)
+                //no can do
+                return [];
+
+            return [...nextMoves, ...halfMoves2, [nextRow, nextColumn]];
+        }
+
+        return [...nextMoves, [nextRow, nextColumn]];
+    }
+
+    // just do it
+    return [[nextRow, nextColumn]];
+}
+
 
 function findBoxes(m: string[][]): number[][] {
     const boxes: number[][] = [];
@@ -74,36 +145,7 @@ function walkWays(m: string[][], steps: string[]) {
     }
 }
 
-function walkBigWays(m: string[][], steps: string[]) {
-    const guard: number[] = findGuard(m);
-
-    // printWarehouse(m, `Beginning...`);
-
-    let turn = 0;
-
-    let row = guard[0];
-    let col = guard[1];
-    while (turn < steps.length) {
-        const stepDir = steps[turn];
-
-        const dir = DIRECTIONS.get(stepDir)!;
-
-        const toRow = row + dir[1];
-        const toCol = col + dir[0];
-        if (largeStep(m, [col], [row], dir)) {
-            col = toCol;
-            row = toRow;
-        }
-
-        // printWarehouse(m, `Turn ${turn}, went ${stepDir}`);
-
-        //end turn
-        turn++;
-    }
-    printWarehouse(m, `Turn ${turn}`);
-}
-
-function printWarehouse(m: string[][], t: string, animate: boolean = false) {
+function printWarehouse(m: string[][], t: string, animate: boolean = true) {
     console.clear();
     console.log(t);
     console.log(m.map(r => r.join('')).join('\n'));
@@ -136,90 +178,6 @@ function printWarehouse(m: string[][], t: string, animate: boolean = false) {
     // if (handle) {
     //     clearTimeout(handle)
     // }
-}
-
-function largeStep(m: string[][], fromCol: number[], fromRow: number[], dir: number[]): boolean {
-
-    const nextMoves = new Set<string>();
-    nextMoves.add(`${fromRow},${fromCol}`);
-
-    const n = m.length;
-    const k = m[fromRow[0]].length;
-
-    let blocked = false;
-    // const moves: number[] = [];
-    for (let stepIx = 0; stepIx < fromCol.length && !blocked; stepIx++) {
-
-        const toRow = fromRow[stepIx] + dir[1];
-        const toCol = fromCol[stepIx] + dir[0];
-        if (toCol < 0 || toRow < 0 || toCol >= k || toRow >= n || m[toRow][toCol] === BLOCK) {
-            //can't move, stay here
-            blocked = true;
-        }
-        else if (m[toRow][toCol] === BIG_BOX[0] && dir !== LEFT && dir !== RIGHT) {
-            nextMoves.add(`${toRow},${toCol}`);
-            nextMoves.add(`${toRow},${toCol + 1}`);
-            // if (largeStep(m, [toCol, toCol + 1], [toRow, toRow], dir))
-            //     moves.push(stepIx);
-            // else
-            //     blocked = true;
-        }
-        else if (m[toRow][toCol] === BIG_BOX[1] && dir !== LEFT && dir !== RIGHT) {
-            nextMoves.add(`${toRow},${toCol - 1}`);
-            nextMoves.add(`${toRow},${toCol}`);
-            // if (largeStep(m, [toCol - 1, toCol], [toRow, toRow], dir))
-            //     moves.push(stepIx);
-            // else
-            //     blocked = true;
-        }
-        else {
-            //mark to be moved
-            nextMoves.add(`${fromRow[stepIx]},${fromCol[stepIx]}`);
-            // moves.push(stepIx);
-        }
-    }
-
-    if (!blocked) {
-        const next = nextSteps(m, fromCol, fromRow, dir);
-        if (!next)
-            return false;
-        next.forEach(k => nextMoves.add(k));
-
-        // if (!nextMoves.values().every(mv => canMove(m, parseInt(mv.slice(mv.indexOf(',') + 1)), parseInt(mv.slice(0, mv.indexOf(','))), dir)))
-        //     return false;
-
-        nextMoves.keys().toArray().reverse().forEach((k) => {
-            if (!move(m, parseInt(k.slice(k.indexOf(',') + 1)), parseInt(k.slice(0, k.indexOf(','))), dir)) {
-                blocked = true;
-            }
-        });
-    }
-    // if (!blocked && moves.length > 0) {
-    //     moves.forEach(stepIx => {
-    //         if (!move(m, fromCol[stepIx], fromRow[stepIx], dir)) {
-    //             blocked = true;
-    //         }
-    //     });
-    // }
-
-    return !blocked;
-}
-
-function canMove(m: string[][], fromCol: number, fromRow: number, dir: number[]) {
-    const n = m.length;
-    const k = m[fromRow].length;
-
-    const toRow = fromRow + dir[1];
-    const toCol = fromCol + dir[0];
-    if (toCol < 0 || toRow < 0 || toCol >= k || toRow >= n || m[toRow][toCol] === BLOCK) {
-        //can't move, stay here
-        return false;
-    }
-    else if ([BOX, ...BIG_BOX].every(b => b !== m[toRow][toCol]) || canMove(m, toCol, toRow, dir)) {
-        return true;
-    }
-
-    return false;
 }
 
 function move(m: string[][], fromCol: number, fromRow: number, dir: number[]) {
@@ -260,48 +218,4 @@ function engorge(w: string[][]): string[][] {
     });
 
     return engordedWarehouse;
-}
-
-function nextSteps(m: string[][], fromCol: number[], fromRow: number[], dir: number[]) {
-
-    const nextMoves = new Set<string>();
-    nextMoves.add(`${fromRow},${fromCol}`);
-
-    const n = m.length;
-    const k = m[fromRow[0]].length;
-
-    let blocked = false;
-    // const moves: number[] = [];
-    for (let stepIx = 0; stepIx < fromCol.length && !blocked; stepIx++) {
-
-        const toRow = fromRow[stepIx] + dir[1];
-        const toCol = fromCol[stepIx] + dir[0];
-        if (toCol < 0 || toRow < 0 || toCol >= k || toRow >= n || m[toRow][toCol] === BLOCK) {
-            //can't move, stay here
-            blocked = true;
-        }
-        else if (m[toRow][toCol] === BIG_BOX[0] && dir !== LEFT && dir !== RIGHT) {
-            nextMoves.add(`${toRow},${toCol}`);
-            nextMoves.add(`${toRow},${toCol + 1}`);
-            // if (largeStep(m, [toCol, toCol + 1], [toRow, toRow], dir))
-            //     moves.push(stepIx);
-            // else
-            //     blocked = true;
-        }
-        else if (m[toRow][toCol] === BIG_BOX[1] && dir !== LEFT && dir !== RIGHT) {
-            nextMoves.add(`${toRow},${toCol - 1}`);
-            nextMoves.add(`${toRow},${toCol}`);
-            // if (largeStep(m, [toCol - 1, toCol], [toRow, toRow], dir))
-            //     moves.push(stepIx);
-            // else
-            //     blocked = true;
-        }
-        else {
-            //mark to be moved
-            nextMoves.add(`${fromRow[stepIx]},${fromCol[stepIx]}`);
-            // moves.push(stepIx);
-        }
-    }
-
-    return blocked ? undefined : nextMoves.keys().toArray();
 }

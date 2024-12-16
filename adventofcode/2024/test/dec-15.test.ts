@@ -16,7 +16,7 @@ test("small robot, big baby warehouse", () => {
 });
 
 test("small robot, 1 extra baby warehouse", () => {
-  expect(allBigBoxes(extraBaby1, extraBabySteps)).toEqual(3536);
+  expect(allBigBoxes(extraBaby1, extraBabySteps)).toEqual(4136);
 });
 
 test("small robot, hole warehouse", () => {
@@ -68,7 +68,7 @@ const extraBaby1 = [
 ].map(r => r.split(''));
 
 const extraBabySteps = [
-  'v>>^^>>v'
+  'v>>^^>>vvvvvvv'
 ].join('').split('');
 
 const holeWarehouse = [
@@ -181,4 +181,4 @@ const extraWarehouse = [
 
 const extraSteps = [
   '>><vvv>v>^^^'
-].join('').split('');;
+].join('').split('');
