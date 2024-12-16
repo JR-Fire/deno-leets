@@ -28,7 +28,7 @@ export function allCheapestPathTiles(dataMap: string[][]): number {
     const { maze, start, end } = getMap(dataMap);
 
     const cheapest = getMinScore(maze, start, end);
-    const all = getAllPaths(maze, start, end, cheapest);
+    const all= getAllMinPaths(maze, start, end, cheapest);
 
     const uq = new Set<string>();
     all.forEach(p => p.forEach((p) => uq.add(`${p.x},${p.y}`)));
@@ -90,41 +90,40 @@ function getMinScore(maze: string[][], start: Coordinates, end: Coordinates): nu
     return 0;
 };
 
-function getAllPaths(maze: string[][], start: Coordinates, end: Coordinates, cheapest: number): Coordinates[][] {
-    const pathCosts: [[number, number, number, number, Coordinates[]]] = [
-        [start.x, start.y, 1, 0, [start]],
-    ];
+function getAllMinPaths(maze: string[][], start: Coordinates, end: Coordinates, cheapest: number): Coordinates[][] {
+    //start at Sxy, facing east - at DIRECTIONS[1]
+    const pathCosts: [number, number, number, number, Coordinates[]][] = [[start.x, start.y, 1, 0, [start]]];
     const visited = new Map<string, number>();
     const paths: Coordinates[][] = [];
 
     while (pathCosts.length) {
+        //try the next one
         const [x, y, dirIx, score, path] = pathCosts.shift()!;
 
         const k = `${x},${y},${dirIx}`;
+        const otherPath = visited.get(k) || score;
+        if (score <= cheapest) {
+            if (score <= otherPath) {
+                //new one, or a cheaper path to this place
+                if (x === end.x && y === end.y && score === cheapest) {
+                    //found one
+                    paths.push(path);
+                } else {
+                    visited.set(k, score);
 
-        if (score > cheapest)
-            //too expensive already
-            continue;
-        if (visited.has(k) && visited.get(k)! < score)
-            //we can get here much cheaper
-            continue;
+                    const nx = x + DIRECTIONS[dirIx][0];
+                    const ny = y + DIRECTIONS[dirIx][1];
+                    if (maze[ny]?.[nx] !== "#") {
+                        //continue, unless blocked - it's cheapest, turns are expensive
+                        pathCosts.push([nx, ny, dirIx, score + 1, [...path, { x: nx, y: ny }]]);
+                    }
 
-        visited.set(k, score);
-
-        if (x === end.x && y === end.y && score === cheapest) {
-            paths.push(path);
-            continue;
+                    //same path - turn right: +1, turn left: turn right three times...
+                    pathCosts.push([x, y, (dirIx + 1) % 4, score + 1000, [...path]]);
+                    pathCosts.push([x, y, (dirIx + 3) % 4, score + 1000, [...path]]);
+                }
+            }
         }
-
-        const nx = x + DIRECTIONS[dirIx][0];
-        const ny = y + DIRECTIONS[dirIx][1];
-        if (maze[ny]?.[nx] !== "#") {
-            //unless blocked
-            pathCosts.push([nx, ny, dirIx, score + 1, [...path, { x: nx, y: ny }]]);
-        }
-        //turns cost...
-        pathCosts.push([x, y, (dirIx + 1) % 4, score + 1000, [...path]]);
-        pathCosts.push([x, y, (dirIx + 3) % 4, score + 1000, [...path]]);
     }
 
     return paths;
