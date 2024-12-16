@@ -77,7 +77,7 @@ function walkWays(m: string[][], steps: string[]) {
 function walkBigWays(m: string[][], steps: string[]) {
     const guard: number[] = findGuard(m);
 
-    printWarehouse(m, `Beginning...`);
+    // printWarehouse(m, `Beginning...`);
 
     let turn = 0;
 
@@ -95,11 +95,12 @@ function walkBigWays(m: string[][], steps: string[]) {
             row = toRow;
         }
 
-        printWarehouse(m, `Turn ${turn}, went ${stepDir}`);
+        // printWarehouse(m, `Turn ${turn}, went ${stepDir}`);
 
         //end turn
         turn++;
     }
+    printWarehouse(m, `Turn ${turn}`);
 }
 
 function printWarehouse(m: string[][], t: string, animate: boolean = false) {
@@ -138,11 +139,15 @@ function printWarehouse(m: string[][], t: string, animate: boolean = false) {
 }
 
 function largeStep(m: string[][], fromCol: number[], fromRow: number[], dir: number[]): boolean {
+
+    const nextMoves = new Set<string>();
+    nextMoves.add(`${fromRow},${fromCol}`);
+
     const n = m.length;
     const k = m[fromRow[0]].length;
 
     let blocked = false;
-    const moves: number[] = [];
+    // const moves: number[] = [];
     for (let stepIx = 0; stepIx < fromCol.length && !blocked; stepIx++) {
 
         const toRow = fromRow[stepIx] + dir[1];
@@ -152,32 +157,69 @@ function largeStep(m: string[][], fromCol: number[], fromRow: number[], dir: num
             blocked = true;
         }
         else if (m[toRow][toCol] === BIG_BOX[0] && dir !== LEFT && dir !== RIGHT) {
-            if (largeStep(m, [toCol, toCol + 1], [toRow, toRow], dir))
-                moves.push(stepIx);
-            else
-                blocked = true;
+            nextMoves.add(`${toRow},${toCol}`);
+            nextMoves.add(`${toRow},${toCol + 1}`);
+            // if (largeStep(m, [toCol, toCol + 1], [toRow, toRow], dir))
+            //     moves.push(stepIx);
+            // else
+            //     blocked = true;
         }
         else if (m[toRow][toCol] === BIG_BOX[1] && dir !== LEFT && dir !== RIGHT) {
-            if (largeStep(m, [toCol - 1, toCol], [toRow, toRow], dir))
-                moves.push(stepIx);
-            else
-                blocked = true;
+            nextMoves.add(`${toRow},${toCol - 1}`);
+            nextMoves.add(`${toRow},${toCol}`);
+            // if (largeStep(m, [toCol - 1, toCol], [toRow, toRow], dir))
+            //     moves.push(stepIx);
+            // else
+            //     blocked = true;
         }
         else {
             //mark to be moved
-            moves.push(stepIx);
+            nextMoves.add(`${fromRow[stepIx]},${fromCol[stepIx]}`);
+            // moves.push(stepIx);
         }
     }
 
-    if (!blocked && moves.length > 0) {
-        moves.forEach(stepIx => {
-            if (!move(m, fromCol[stepIx], fromRow[stepIx], dir)) {
+    if (!blocked) {
+        const next = nextSteps(m, fromCol, fromRow, dir);
+        if (!next)
+            return false;
+        next.forEach(k => nextMoves.add(k));
+
+        // if (!nextMoves.values().every(mv => canMove(m, parseInt(mv.slice(mv.indexOf(',') + 1)), parseInt(mv.slice(0, mv.indexOf(','))), dir)))
+        //     return false;
+
+        nextMoves.keys().toArray().reverse().forEach((k) => {
+            if (!move(m, parseInt(k.slice(k.indexOf(',') + 1)), parseInt(k.slice(0, k.indexOf(','))), dir)) {
                 blocked = true;
             }
         });
     }
+    // if (!blocked && moves.length > 0) {
+    //     moves.forEach(stepIx => {
+    //         if (!move(m, fromCol[stepIx], fromRow[stepIx], dir)) {
+    //             blocked = true;
+    //         }
+    //     });
+    // }
 
     return !blocked;
+}
+
+function canMove(m: string[][], fromCol: number, fromRow: number, dir: number[]) {
+    const n = m.length;
+    const k = m[fromRow].length;
+
+    const toRow = fromRow + dir[1];
+    const toCol = fromCol + dir[0];
+    if (toCol < 0 || toRow < 0 || toCol >= k || toRow >= n || m[toRow][toCol] === BLOCK) {
+        //can't move, stay here
+        return false;
+    }
+    else if ([BOX, ...BIG_BOX].every(b => b !== m[toRow][toCol]) || canMove(m, toCol, toRow, dir)) {
+        return true;
+    }
+
+    return false;
 }
 
 function move(m: string[][], fromCol: number, fromRow: number, dir: number[]) {
@@ -218,4 +260,48 @@ function engorge(w: string[][]): string[][] {
     });
 
     return engordedWarehouse;
+}
+
+function nextSteps(m: string[][], fromCol: number[], fromRow: number[], dir: number[]) {
+
+    const nextMoves = new Set<string>();
+    nextMoves.add(`${fromRow},${fromCol}`);
+
+    const n = m.length;
+    const k = m[fromRow[0]].length;
+
+    let blocked = false;
+    // const moves: number[] = [];
+    for (let stepIx = 0; stepIx < fromCol.length && !blocked; stepIx++) {
+
+        const toRow = fromRow[stepIx] + dir[1];
+        const toCol = fromCol[stepIx] + dir[0];
+        if (toCol < 0 || toRow < 0 || toCol >= k || toRow >= n || m[toRow][toCol] === BLOCK) {
+            //can't move, stay here
+            blocked = true;
+        }
+        else if (m[toRow][toCol] === BIG_BOX[0] && dir !== LEFT && dir !== RIGHT) {
+            nextMoves.add(`${toRow},${toCol}`);
+            nextMoves.add(`${toRow},${toCol + 1}`);
+            // if (largeStep(m, [toCol, toCol + 1], [toRow, toRow], dir))
+            //     moves.push(stepIx);
+            // else
+            //     blocked = true;
+        }
+        else if (m[toRow][toCol] === BIG_BOX[1] && dir !== LEFT && dir !== RIGHT) {
+            nextMoves.add(`${toRow},${toCol - 1}`);
+            nextMoves.add(`${toRow},${toCol}`);
+            // if (largeStep(m, [toCol - 1, toCol], [toRow, toRow], dir))
+            //     moves.push(stepIx);
+            // else
+            //     blocked = true;
+        }
+        else {
+            //mark to be moved
+            nextMoves.add(`${fromRow[stepIx]},${fromCol[stepIx]}`);
+            // moves.push(stepIx);
+        }
+    }
+
+    return blocked ? undefined : nextMoves.keys().toArray();
 }
