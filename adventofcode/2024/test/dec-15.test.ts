@@ -4,11 +4,11 @@ import { allBigBoxes, allBoxes } from "../dec-15.ts";
 const { test } = Deno;
 
 test("baby warehouse, baby steps", () => {
-  expect(allBoxes(babyWarehouse, babySteps)).toEqual(104);
+  expect(allBoxes(JSON.parse(JSON.stringify(babyWarehouse)), JSON.parse(JSON.stringify(babySteps)))).toEqual(104);
 });
 
 test("small robot, baby warehouse", () => {
-  expect(allBigBoxes(babyWarehouse, babySteps)).toEqual(109);
+  expect(allBigBoxes(JSON.parse(JSON.stringify(babyWarehouse)), JSON.parse(JSON.stringify(babySteps)))).toEqual(109);
 });
 
 test("small robot, big baby warehouse", () => {
@@ -28,19 +28,19 @@ test("small robot, left hole warehouse", () => {
 });
 
 test("small robot, small warehouse", () => {
-  expect(allBigBoxes(smallWarehouse, smallSteps)).toEqual(1751);
+  expect(allBigBoxes(JSON.parse(JSON.stringify(smallWarehouse)), JSON.parse(JSON.stringify(smallSteps)))).toEqual(1751);
 });
 
 test("small warehouse, small steps", () => {
-  expect(allBoxes(smallWarehouse, smallSteps)).toEqual(2028);
+  expect(allBoxes(JSON.parse(JSON.stringify(smallWarehouse)), JSON.parse(JSON.stringify(smallSteps)))).toEqual(2028);
 });
 
 test("larger warehouse, larger steps", () => {
-  expect(allBoxes(largerWarehouse, largerSteps)).toEqual(10092);
+  expect(allBoxes(JSON.parse(JSON.stringify(largerWarehouse)), JSON.parse(JSON.stringify(largerSteps)))).toEqual(10092);
 });
 
 test("small robot, larger warehouse", () => {
-  expect(allBigBoxes(largerWarehouse, largerSteps)).toEqual(9021);
+  expect(allBigBoxes(JSON.parse(JSON.stringify(largerWarehouse)), JSON.parse(JSON.stringify(largerSteps)))).toEqual(9021);
 });
 
 test("small robot in prison warehouse", () => {

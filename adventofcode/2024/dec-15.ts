@@ -1,3 +1,5 @@
+import { print } from "../../utils.ts"
+
 const GUARD = "@";
 const BOX = "O";
 const BIG_BOX = ['[', ']'];
@@ -28,7 +30,7 @@ export function allBigBoxes(warehouse: string[][], steps: string[]): number {
     return findBoxes(bigWarehouse).reduce((s, b) => s + b[0] * 100 + b[1], 0);
 }
 function walkTheWay(m: string[][], steps: string[], animate = false) {
-    printWarehouse(m, "Beginning...", animate);
+    print(m, "Beginning...", animate);
 
     const guard = findGuard(m);
     while (steps.length > 0) {
@@ -56,7 +58,7 @@ function walkTheWay(m: string[][], steps: string[], animate = false) {
             guard[1] += column;
         }
 
-        printWarehouse(m, `${step}`, animate);
+        print(m, `${step}`, animate);
     }
 }
 
@@ -143,41 +145,6 @@ function walkWays(m: string[][], steps: string[]) {
         //end turn
         turn++;
     }
-}
-
-function printWarehouse(m: string[][], t: string, animate: boolean = true) {
-    console.clear();
-    console.log(t);
-    console.log(m.map(r => r.join('')).join('\n'));
-
-    if (animate)
-        //poor man's delay
-        for (let sleep = 0; sleep < 1000000000; sleep++);
-
-    // let tmr: number;
-    // const p = new Promise((r) => { tmr = setTimeout(r, 5000); });
-
-    // p.then().finally(() => {
-    //     if (tmr)
-    //         clearTimeout(tmr)
-    // });
-
-    // const handle = setTimeout(callback, timeout)
-    // clearTimeout(handle)
-
-    // let handle
-    // await Promise.race([
-    //     http.get(‘pocketgems.com / careers /’),
-    //     new Promise((resolve, reject) => {
-    //         handle = setTimeout(() => {
-    //             handle = undefined
-    //             resolve()
-    //         }, timeout)
-    //     })
-    // ])
-    // if (handle) {
-    //     clearTimeout(handle)
-    // }
 }
 
 function move(m: string[][], fromCol: number, fromRow: number, dir: number[]) {
