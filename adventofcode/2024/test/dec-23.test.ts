@@ -1,5 +1,5 @@
 import { expect } from "jsr:@std/expect";
-import { optionsCount } from "../dec-23.ts";
+import { optionsCount, optionsMost } from "../dec-23.ts";
 
 const { test } = Deno;
 
@@ -35,11 +35,19 @@ test("7 tX in test network", () => {
     expect(optionsCount(testNetwork, 't')).toEqual(7);
 });
 
+test("4 tX in biggest test network", () => {
+    expect(optionsMost(testNetwork, 't')).toEqual(4);
+});
 
 test("666 tX in network", () => {
     const r = optionsCount(network, 't');
     expect(r).not.toEqual(96);
     expect(r).toEqual(998);
+});
+
+test("largest tX in network", () => {
+    const r = optionsMost(network, 't');
+    expect(r).toEqual(666);
 });
 
 const testNetwork = [

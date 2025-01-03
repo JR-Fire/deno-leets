@@ -126,15 +126,22 @@ export function pressCode(target: string, level: number = 3): string[] {
 
         let l = 0;
 
+        console.log(s, trail.map(t => translate(t.direction)));
         let tp = [...trail];
+        console.log(tp);
         do {
+            const ltp = [];
             for (let j = 0; j < tp.length; j++) {
+
                 const dPath = pressOnPad({ symbol: ACCEPT, direction: [0, 0] }, translate(tp[j].direction), DPAD);
                 dPath.shift();
                 const a = pressOnPad(dPath[dPath.length - 1], ACCEPT, DPAD);
                 a.shift();
-                tp = [...dPath, ...a];
+                ltp.push(...dPath);
+                ltp.push(...a);
             }
+            tp = ltp;
+            console.log('level', l, tp);
             l++;
         } while (l < level);
 
@@ -142,19 +149,6 @@ export function pressCode(target: string, level: number = 3): string[] {
     }
 
     return path.map(p => p.symbol);
-}
-
-function translate(d: number[]): string {
-    switch (d) {
-        case LEFT:
-            return '<';
-        case RIGHT:
-            return '>';
-        case TOP:
-            return '^';
-        default:
-            return 'v';
-    }
 }
 
 //A-> ? -> ? -> target
@@ -184,4 +178,17 @@ export function pressOnPad(current: Path, target: string, pad: Map<string, Path[
     }
 
     return [current, ...nextPaths];
+}
+
+function translate(d: number[]): string {
+    switch (d) {
+        case LEFT:
+            return '<';
+        case RIGHT:
+            return '>';
+        case TOP:
+            return '^';
+        default:
+            return 'v';
+    }
 }

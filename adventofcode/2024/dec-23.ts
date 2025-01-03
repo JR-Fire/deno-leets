@@ -1,11 +1,18 @@
 export function optionsCount(network: string[][], start: string): number {
-    const [locals, triplets] = local(network);
+    const [_, triplets, __] = local(network);
     //console.log(triplets.values().toArray().sort());
     return triplets.values()
         .reduce((s, c) => s + (c.split(',').filter(n => n.charAt(0) === start).length > 0 ? 1 : 0), 0);
 }
 
-function local(network: string[][]): [Map<string, string[]>, Set<string>] {
+export function optionsMost(network: string[][], start: string): number {
+    const [locals, triplets, most] = local(network);
+    console.log(most);
+    return most.size;
+}
+
+function local(network: string[][]): [Map<string, string[]>, Set<string>, Set<string>] {
+    const most: Set<string> = new Set<string>();
     const triplets: Set<string> = new Set<string>();
     const locals = new Map<string, string[]>();
     network.map(c => {
@@ -26,5 +33,15 @@ function local(network: string[][]): [Map<string, string[]>, Set<string>] {
         locals.set(c[1], [...link2, c[0]]);
     });
 
-    return [locals, triplets];
+    // locals.keys().forEach(n => {
+    //     const links = locals.get(n)!;
+    //     for (let i = 1; i < links.length; i++) {
+    //         const plink = links[i - 1];
+    //         const link = links[i];
+
+    //         if (locals.get(plink) && locals.get(plink)!.filter(l=>l===link)
+    //     }
+    // });
+
+    return [locals, triplets, most];
 }

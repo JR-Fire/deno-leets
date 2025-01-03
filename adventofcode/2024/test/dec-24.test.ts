@@ -1,5 +1,5 @@
 import { expect } from "jsr:@std/expect";
-import { out } from "../dec-24.ts";
+import { express, out } from "../dec-24.ts";
 
 const { test } = Deno;
 
@@ -13,6 +13,18 @@ test("example outputs 2024", () => {
 
 test("in outputs 53190357879014", () => {
     expect(out(inp, gates)).toEqual(53190357879014);
+});
+
+test("sample express", () => {
+    expect(express(sampleIn, sampleGates)).toEqual(3);
+});
+
+test("example express", () => {
+    expect(express(exampleIn, exampleGates)).toEqual(13);
+});
+
+test("in express", () => {
+    expect(express(inp, gates)).toEqual(46);
 });
 
 
